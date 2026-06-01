@@ -45,17 +45,17 @@
 		@if(Auth::check())
 			<div class="flex items-center gap-4 mr-6 text-white">
 
-    			<div class="bg-gray-800 px-3 py-1 rounded-lg">
-        		⭐ Lv. {{ Auth::user()->level() }}
+			 <div class="bg-gray-800 px-3 py-1 rounded-lg flex items-center gap-1 text-white hover:scale-105 transition shadow-lg">
+        			⭐ <span>Lv {{ Auth::user()->level() }}</span>
     			</div>
 
-    			<div class = "bg-blue-600 px-3 py-1 rounded-lg">
-        		⚡ XP {{ Auth::user()->xp }}
+    			<div class="bg-blue-600 px-3 py-1 rounded-lg flex items-center gap-1 text-white hover:scale-105 transition shadow-lg">
+        			⚡ <span>{{ Auth::user()->xp }}</span>
     			</div>
 
-			<div class="bg-yellow-500 text-black px-3 py-1 rounded-lg font-bold">
-			💰 {{ Auth::user()->points }}
-			</div>
+    			<div class="bg-yellow-500 px-3 py-1 rounded-lg flex items-center gap-1 text-black font-bold hover:scale-105 transition shadow-lg">
+        			💰 <span>{{ Auth::user()->points }}</span>
+    			</div>
 
 			<div class="px-3 py-1 rounded-lg font-bold
 			    {{ Auth::user()->login_streak >= 7 ? 'bg-yellow-500 text-black' : 'bg-red-600 text-white' }}">
@@ -67,7 +67,20 @@
 		<x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-300 bg-gray-900 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+                            <div class="flex items-center gap-2">
+    				@if(Auth::user()->avatar)
+        				<img
+            				src="{{ asset('storage/' . Auth::user()->avatar) }}"
+            				class="w-8 h-8 rounded-full object-cover border border-gray-600"
+        				>
+    				@else
+        				<div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm">
+            				{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+        				</div>
+    				@endif
+
+    				<span>{{ Auth::user()->name }}</span>
+			   </div>
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">

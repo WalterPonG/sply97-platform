@@ -13,9 +13,23 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
         @csrf
         @method('patch')
+
+	<div class="mt-4">
+    	<x-input-label for="avatar" value="Avatar" />
+
+        <input
+        type="file"
+        name="avatar"
+        id="avatar"
+        accept="image/*"
+        class="mt-1 block w-full"
+    	/>
+	</div>
+
+
 
         <div>
             <x-input-label for="name" :value="__('Name')" />
@@ -46,6 +60,20 @@
                 </div>
             @endif
         </div>
+
+	<div class="mt-4">
+    		<x-input-label for="clash_tag" value="Tag Clash" />
+    		<x-text-input
+        	id="clash_tag"
+        	name="clash_tag"
+        	type="text"
+        	class="mt-1 block w-full"
+        	:value="old('clash_tag', $user->clash_tag)"
+        	placeholder="#P8YQJ9L8"
+    		/>
+
+    		<x-input-error class="mt-2" :messages="$errors->get('clash_tag')" />
+	</div>
 
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
