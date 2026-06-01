@@ -42,18 +42,28 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                	<div class="flex items-center gap-4 mr-6 text-white">
+		@if(Auth::check())
+			<div class="flex items-center gap-4 mr-6 text-white">
 
     			<div class="bg-gray-800 px-3 py-1 rounded-lg">
         		⭐ Lv. {{ Auth::user()->level() }}
     			</div>
 
-    			<div class="bg-yellow-500 text-black px-3 py-1 rounded-lg font-bold">
-        		💰 {{ Auth::user()->points }}
+    			<div class = "bg-blue-600 px-3 py-1 rounded-lg">
+        		⚡ XP {{ Auth::user()->xp }}
     			</div>
 
-		</div>
+			<div class="bg-yellow-500 text-black px-3 py-1 rounded-lg font-bold">
+			💰 {{ Auth::user()->points }}
+			</div>
 
+			<div class="px-3 py-1 rounded-lg font-bold
+			    {{ Auth::user()->login_streak >= 7 ? 'bg-yellow-500 text-black' : 'bg-red-600 text-white' }}">
+    			    🔥 Racha de {{ Auth::user()->login_streak }} día(s)
+			</div>
+
+			</div>
+		@endif
 		<x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-300 bg-gray-900 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">

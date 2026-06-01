@@ -27,13 +27,30 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+	    'last_login_xp_at' => 'datetime',
         ];
     }
 
-
+	// nivel usuario
     public function level(){
-	return floor($this-xp/100);
+	return (int) floor(($this->xp ?? 0) /100);
+    }
+	// util para subir de nivel limpio
+    public function xpForNextLevel()
+    {
+	return ($this->level() + 1) * 100;
     }
 
 
+     public function canReceiveDailyLoginXp(): bool
+{
+    return !$this->last_login_xp_at ||
+        $this->last_login_xp_at->diffInHours(now()) >= 24;
+}
+
+public function markLoginXp(): void
+{
+    $this->last_login_xp_at = now();
+    $this->save();
+}
 }
