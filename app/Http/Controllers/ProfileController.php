@@ -32,7 +32,9 @@ class ProfileController extends Controller
 
     		$path = $request->file('avatar')->store('avatars', 'public');
 
-    		$request->user()->avatar = $path;
+    		$request->user()->update([
+			'avatar' => $path
+		]);
 	}
 
         if ($request->user()->isDirty('email')) {

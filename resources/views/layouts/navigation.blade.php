@@ -5,35 +5,35 @@
             <div class="flex">
 		<!-- Logo -->
 		<div class="shrink-0 flex items-center">
-    			<a href="{{ route('dashboard') }}" class="text-2xl font-bold text-white">
+    			<a href="{{ route('dashboard') }}" class="text-2xl font-bold ">
         		Sply97
     			</a>
 		</div>
 		<!-- Navigation Links -->
 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex items-center">
 
+		<x-nav-link href="/">
+                        Home
+                </x-nav-link>
+
     		<x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
         	Dashboard
     		</x-nav-link>
 
-    		<x-nav-link href="/">
-        		Home
-    		</x-nav-link>
-
     		<x-nav-link href="/leaderboard">
-        		Ranking
+        		Leaderboard
     		</x-nav-link>
 
-    		<x-nav-link href="/clans">
+    		<x-nav-link href="/clanes">
         		Clanes
     		</x-nav-link>
 
-    		<x-nav-link href="/wars">
-        		Wars
+    		<x-nav-link href="/guerras">
+        		Guerras
     		</x-nav-link>
 
-    		<x-nav-link href="/rewards">
-        		Rewards
+    		<x-nav-link href="/eventos">
+        		Eventos
     		</x-nav-link>
 
 		</div>
@@ -43,15 +43,36 @@
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
 		@if(Auth::check())
-			<div class="flex items-center gap-4 mr-6 text-white">
+			<div class="flex items-center gap-4 mr-6 ">
 
-			 <div class="bg-gray-800 px-3 py-1 rounded-lg flex items-center gap-1 text-white hover:scale-105 transition shadow-lg">
+			 <div class="bg-gray-800 px-3 py-1 rounded-lg flex items-center gap-1 hover:scale-105 transition shadow-lg text-white">
         			⭐ <span>Lv {{ Auth::user()->level() }}</span>
     			</div>
 
-    			<div class="bg-blue-600 px-3 py-1 rounded-lg flex items-center gap-1 text-white hover:scale-105 transition shadow-lg">
-        			⚡ <span>{{ Auth::user()->xp }}</span>
-    			</div>
+			        <!-- level interactivo -->
+				@php
+    					$xp = Auth::user()->xp;
+    					$currentXp = $xp % 100;
+    					$maxXp = 100;
+    					$percent = ($currentXp / $maxXp) * 100;
+				@endphp
+
+				<div class="bg-blue-600 px-3 py-1 rounded-lg flex items-center gap-2 min-w-[180px]">
+
+    				⚡
+
+    				<div class="w-28 h-2 bg-blue-900 rounded-full overflow-hidden border border-blue-400">
+        			<div
+            					class="h-full bg-blue-300 transition-all duration-700 shadow-lg"
+            					style="width: {{ $percent }}%"
+        			></div>
+    				</div>
+
+    						<span class="text-xs">
+        					{{ $currentXp }}/ 100
+    					</span>
+
+				</div>
 
     			<div class="bg-yellow-500 px-3 py-1 rounded-lg flex items-center gap-1 text-black font-bold hover:scale-105 transition shadow-lg">
         			💰 <span>{{ Auth::user()->points }}</span>
@@ -67,7 +88,7 @@
 		<x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-300 bg-gray-900 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 ">
     				@if(Auth::user()->avatar)
         				<img
             				src="{{ asset('storage/' . Auth::user()->avatar) }}"
