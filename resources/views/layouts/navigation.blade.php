@@ -32,8 +32,8 @@
         		Guerras
     		</x-nav-link>
 
-    		<x-nav-link href="/eventos">
-        		Eventos
+    		<x-nav-link href="/misiones">
+        		Misiones
     		</x-nav-link>
 
 		</div>

@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-use App\Http\Controllers\User;
+use App\Models\User;
+use App\Services\MissionService;
 class ProfileController extends Controller
 {
     /**
@@ -26,23 +27,29 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+
+        $user = $request->user();
+
+
+        $user->fill($request->validated());
+
 
 	if ($request->hasFile('avatar')) {
 
     		$path = $request->file('avatar')->store('avatars', 'public');
 
-    		$request->user()->update([
-			'avatar' => $path
-		]);
+    		$user->avatar = $path;
 	}
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
+	MissionService::completeByCondition($user, 'upload_avatar');
+	MissionService::completeByCondition($user, 'set_clash_tag');
+	MissionService::completeByCondition($user, 'profile_complete');
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 

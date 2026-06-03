@@ -3,10 +3,11 @@
 use App\Http\Controllers\ProfileController; // cargamos interfaz perfil
 use App\Models\User; // cargo usuario
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\MissionController;
 Route::get('/', function () {
     return redirect('/login');
 });
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -16,6 +17,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/misiones', [MissionController::class, 'index']);
+    Route::post('/misiones/{id}/complete', [MissionController::class, 'complete']);
+    Route::post('/misiones/{id}/claim', [MissionController::class, 'claim']);
+
 
   Route::get('/dashboard', function () {
         return view('dashboard');
@@ -36,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/wars', function () {
         return view('wars');
     });
+
 
 });
 

@@ -6,7 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Event;
 use App\Services\XpService;
-
+use App\Services\MissionService;
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
     		$bonus = min($user->login_streak * 2, 50); // cap 50 XP bonus
 
     	\App\Services\XpService::addXp($user, $xpBase + $bonus);
-
+	MissionService::completeDailyLoginMission($user);
     	$user->save();
 	});
 

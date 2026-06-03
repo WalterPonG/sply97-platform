@@ -54,4 +54,10 @@ public function markLoginXp(): void
     $this->last_login_xp_at = now();
     $this->save();
 }
+
+
+public function missions()
+{
+    return $this->hasMany(UserMission::class);
+}
 }
