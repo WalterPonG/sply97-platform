@@ -10,6 +10,12 @@ class MissionController extends Controller
 {
     public function index()
     {
+$user = auth()->user();
+
+if ($user) {
+    \App\Services\MissionService::completeDailyLoginMission($user);
+}
+
     $missions = MissionService::getUserMissions(auth()->user());
 
     $grouped = $missions->groupBy('group');

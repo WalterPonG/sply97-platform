@@ -18,7 +18,7 @@
 
         <div class="bg-gray-900 p-3 rounded">
             <div class="text-green-400 font-bold">
-                Lv {{ Auth::user()->level() }}
+                Lv {{ Auth::user()->level }}
             </div>
             <div class="text-xs text-gray-400">Level</div>
         </div>

@@ -15,6 +15,18 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased bg-gray-950">
+
+	@if(session('level_up'))
+	<script>
+	document.addEventListener('DOMContentLoaded', () => {
+    		addFeed('LEVEL UP! 🎉', 'level');
+	});
+	</script>
+	@endif
+
+	<div id="rewardPopup"
+     		class="fixed bottom-6 right-6 bg-gray-900 text-white p-4 rounded-xl shadow-lg hidden">
+	</div>
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
             @include('layouts.navigation')
 
@@ -32,5 +44,10 @@
                 {{ $slot }}
             </main>
         </div>
-    </body>
+
+	<div id="eventFeed"
+     		class="fixed top-4 right-4 w-64 space-y-2 z-50">
+	</div>
+
+</body>
 </html>

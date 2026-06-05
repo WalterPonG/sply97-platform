@@ -4,7 +4,7 @@
         {{ $user->name }}
     </h1>
 
-    <p>⭐ Level: {{ $user->level() }}</p>
+    <p>⭐ Level: {{ $user->level }}</p>
     <p>💰 Points: {{ $user->points }}</p>
     <p>⚡ XP: {{ $user->xp }}</p>
 

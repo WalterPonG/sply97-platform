@@ -46,7 +46,7 @@
 			<div class="flex items-center gap-4 mr-6 ">
 
 			 <div class="bg-gray-800 px-3 py-1 rounded-lg flex items-center gap-1 hover:scale-105 transition shadow-lg text-white">
-        			⭐ <span>Lv {{ Auth::user()->level() }}</span>
+        			⭐ <span>Lv {{ Auth::user()->level }}</span>
     			</div>
 
 			        <!-- level interactivo -->

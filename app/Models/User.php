@@ -32,32 +32,46 @@ class User extends Authenticatable
         ];
     }
 
-	// nivel usuario
-    public function level(){
-	return (int) floor(($this->xp ?? 0) /100);
-    }
-	// util para subir de nivel limpio
-    public function xpForNextLevel()
+    // 🎮 LEVEL CALCULADO (NO BD)
+    public function getLevelAttribute()
     {
-	return ($this->level() + 1) * 100;
+        return (int) floor(($this->xp ?? 0) / 100);
     }
 
+    public function xpForNextLevel(): int
+    {
+        return ($this->level + 1) * 100;
+    }
 
-     public function canReceiveDailyLoginXp(): bool
-{
-    return !$this->last_login_xp_at ||
-        $this->last_login_xp_at->diffInHours(now()) >= 24;
-}
+    // 🎮 XP SYSTEM
+    public function addXp(int $xp)
+    {
+        $oldLevel = $this->level;
 
-public function markLoginXp(): void
-{
-    $this->last_login_xp_at = now();
-    $this->save();
-}
+        $this->xp += $xp;
+        $this->save();
 
+        if ($this->level > $oldLevel) {
+            session()->flash('level_up', true);
+        }
+    }
 
-public function missions()
-{
-    return $this->hasMany(UserMission::class);
-}
+    // 🎮 DAILY LOGIN
+    public function canReceiveDailyLoginXp(): bool
+    {
+        return !$this->last_login_xp_at ||
+            $this->last_login_xp_at->diffInHours(now()) >= 24;
+    }
+
+    public function markLoginXp(): void
+    {
+        $this->last_login_xp_at = now();
+        $this->save();
+    }
+
+    // 🎮 RELATIONS
+    public function missions()
+    {
+        return $this->hasMany(UserMission::class);
+    }
 }

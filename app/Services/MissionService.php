@@ -107,9 +107,8 @@ class MissionService
             $mission = $userMission->mission;
 
             // sumar recompensas
-            $user->xp += $mission->xp_reward;
             $user->points += $mission->points_reward;
-
+	    $user->addXp($mission->xp_reward);
             $user->save();
 
             $userMission->update([
@@ -124,7 +123,7 @@ class MissionService
 
     public static function completeDailyLoginMission($user)
     {
-    $mission = Mission::where('title', 'Inicia sesión hoy')->first();
+    $mission = Mission::where('condition_key', 'login_daily')->first();
 
     if (!$mission) {
         return;
@@ -135,12 +134,21 @@ class MissionService
         'mission_id' => $mission->id,
     ]);
 
-    if (!$userMission->completed) {
-        $userMission->update([
-            'completed' => true,
-            'completed_at' => now(),
-        ]);
+    $today = now()->toDateString();
+    $last = optional($userMission->completed_at)->toDateString();
+
+    // 🔥 YA HECHO HOY → no repetir
+    if ($last === $today) {
+        return;
     }
+
+    $userMission->update([
+        'completed' => true,
+        'completed_at' => now(),
+    ]);
+
+
+   
     }
 
     public static function canComplete($user, $mission)
@@ -169,5 +177,33 @@ class MissionService
 	),
         default => false,
     };
+}
+
+public static function getStatus($user, $mission)
+{
+    $userMission = UserMission::firstOrCreate([
+        'user_id' => $user->id,
+        'mission_id' => $mission->id,
+    ]);
+
+    if ($userMission->claimed) return 'claimed';
+
+    if ($userMission->completed) return 'claimable';
+
+    if (!self::canComplete($user, $mission)) return 'available';
+
+    return 'locked';
+}
+public static function isDailyCompleted($user, $mission)
+{
+    $userMission = UserMission::where('user_id', $user->id)
+        ->where('mission_id', $mission->id)
+        ->first();
+
+    if (!$userMission || !$userMission->completed_at) {
+        return false;
+    }
+
+    return $userMission->completed_at->isToday();
 }
 }
