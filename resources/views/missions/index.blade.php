@@ -1,43 +1,51 @@
 <x-app-layout>
-<div class="max-w-7xl mx-auto px-6 py-8">
 
-    <h1 class="text-white text-2xl font-bold mb-6">
-        🎮 Misiones
+<div class="mb-6">
+    <h1 class="text-3xl font-bold tracking-wide">
+        ⚔️ Misiones
     </h1>
+    <p class="text-gray-300 text-sm">
+        Completa objetivos y reclama recompensas
+    </p>
+</div>
 
-    @foreach($progress as $groupName => $data)
+<div class="space-y-8">
 
-        <div class="bg-gray-800 p-4 rounded-xl mb-6">
+@foreach($progress as $groupName => $data)
 
-            {{-- HEADER GRUPO --}}
-            <h2 class="text-white font-bold text-lg mb-2">
-                📦 {{ ucfirst($groupName) }}
+    <div class="relative">
+
+        <!-- HEADER ESTILO SUPER CELL -->
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-xl font-bold text-yellow-300 drop-shadow">
+                {{ strtoupper($groupName) }}
             </h2>
 
-            {{-- PROGRESS BAR --}}
-            <div class="w-full bg-gray-700 rounded h-3 mb-2">
-                <div class="bg-green-500 h-3 rounded"
-                     style="width: {{ $data['percent'] }}%">
-                </div>
+            <div class="text-sm text-gray-300">
+                {{ $data['completed'] }}/{{ $data['total'] }}
             </div>
+        </div>
 
-            <p class="text-sm text-gray-400 mb-4">
-                {{ $data['completed'] }} / {{ $data['total'] }} completadas
-            </p>
-
-            {{-- MISIONES --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                @foreach($data['missions'] as $mission)
-                    @include('missions.partials.card', ['mission' => $mission])
-                @endforeach
-
+        <!-- PROGRESS BAR -->
+        <div class="h-3 w-full bg-black/50 rounded-full overflow-hidden border border-yellow-500/30">
+            <div class="h-full bg-gradient-to-r from-yellow-400 to-orange-500"
+                 style="width: {{ $data['percent'] }}%">
             </div>
+        </div>
+
+        <!-- MISSIONS GRID -->
+        <div class="grid md:grid-cols-2 gap-4 mt-4">
+
+            @foreach($data['missions'] as $mission)
+                @include('missions.partials.card', ['mission' => $mission])
+            @endforeach
 
         </div>
 
-    @endforeach
+    </div>
+
+@endforeach
 
 </div>
-</x-app-layout>
 
+</x-app-layout>

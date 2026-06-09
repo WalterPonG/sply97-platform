@@ -10,3 +10,12 @@
 .popup-anim {
     animation: pop 0.25s ease-out;
 }
+@keyframes slow-pan {
+    0% { transform: scale(1.1) translateY(0px); }
+    50% { transform: scale(1.15) translateY(-10px); }
+    100% { transform: scale(1.1) translateY(0px); }
+}
+
+.animate-slow-pan {
+    animation: slow-pan 20s ease-in-out infinite;
+}

@@ -11,9 +11,13 @@ class UserMission extends Model
         'mission_id',
         'completed',
         'claimed',
-        'completed_at'
+        'completed_at',
+    	'claimed_at',
     ];
-
+    protected $casts = [
+	'completed_at' => 'datetime',
+	'claimed_at' => 'datetime',
+    ];
     public function mission()
     {
         return $this->belongsTo(Mission::class);

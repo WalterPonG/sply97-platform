@@ -3,119 +3,86 @@ $status = \App\Services\MissionService::getStatus(Auth::user(), $mission);
 @endphp
 
 <div class="
-    bg-gray-800 p-4 rounded-xl border transition-all duration-300
+    relative z-10 p-4 rounded-2xl border backdrop-blur-md
+    transition transform hover:scale-[1.02]
 
-```
-@if($status === 'locked')
-    border-gray-700 opacity-40 grayscale
-
-@elseif($status === 'available')
-    border-blue-600
-
-@elseif($status === 'claimable')
-    border-yellow-500 shadow-lg shadow-yellow-500/20
-
-@elseif($status === 'claimed')
-    border-green-600 opacity-75
-
-@endif
-```
-
+    @if($status === 'locked')
+        opacity-40 grayscale border-gray-600
+    @elseif($status === 'available')
+        border-blue-500 bg-blue-500/10
+    @elseif($status === 'claimable')
+        border-yellow-400 bg-yellow-500/10 shadow-lg shadow-yellow-500/20
+    @elseif($status === 'claimed')
+        border-green-500 bg-green-500/10 opacity-70
+    @endif
 ">
 
-```
-{{-- TÍTULO --}}
-<div class="font-bold text-white text-lg">
-    {{ $mission->title }}
-</div>
+    <!-- ICONO ESTILO LOOT -->
+    <div class="absolute -top-3 -right-3 text-2xl">
+        @if($status === 'locked') 🔒
+        @elseif($status === 'available') ⚔️
+        @elseif($status === 'claimable') 🎁
+        @elseif($status === 'claimed') ✔
+        @endif
+    </div>
 
-{{-- ESTADO --}}
-<div class="mt-2 text-sm">
+    <!-- TITLE -->
+    <div class="text-lg font-bold">
+        {{ $mission->title }}
+    </div>
 
-    @if($status === 'locked')
+    <!-- DESC -->
+    <div class="text-sm text-gray-300 mt-1">
+        {{ $mission->description }}
+    </div>
 
-        <span class="text-gray-500">
-            🔒 Bloqueada
-        </span>
+    <!-- REWARDS -->
+    <div class="mt-3 flex gap-3 text-sm">
+        <div class="bg-black/40 px-2 py-1 rounded">
+            ⚡ {{ $mission->xp_reward }} XP
+        </div>
+        <div class="bg-black/40 px-2 py-1 rounded">
+            💰 {{ $mission->points_reward }}
+        </div>
+    </div>
 
-    @elseif($status === 'available')
+    <!-- ACTION -->
+    <div class="mt-4">
 
-        <span class="text-blue-400">
-            🎯 Disponible
-        </span>
+        @if($status === 'available')
 
-    @elseif($status === 'claimable')
+            <form method="POST" action="/misiones/{{ $mission->id }}/complete">
+                @csrf
+                <button class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-xl font-bold">
+                    ⚔️ Completar
+                </button>
+            </form>
 
-        <span class="text-yellow-400 font-semibold">
-            🎁 Recompensa lista
-        </span>
+        @elseif($status === 'claimable')
 
-    @elseif($status === 'claimed')
+            <form method="POST"
+                  action="/misiones/{{ $mission->id }}/claim"
+                  onsubmit="showReward({{ $mission->xp_reward }}, {{ $mission->points_reward }})">
+                @csrf
+                <button class="w-full bg-yellow-500 hover:bg-yellow-400 py-2 rounded-xl font-bold text-black animate-pulse">
+                    🎁 Reclamar
+                </button>
+            </form>
 
-        <span class="text-green-400">
-            ✔ Completada
-        </span>
+        @elseif($status === 'claimed')
 
-    @endif
+            <div class="text-center text-green-300 font-bold">
+                ✔ Reclamado
+            </div>
 
-</div>
+        @else
 
-{{-- DESCRIPCIÓN --}}
-<div class="text-gray-400 text-sm mt-2">
-    {{ $mission->description }}
-</div>
+            <div class="text-center text-gray-400">
+                🔒 Bloqueado
+            </div>
 
-{{-- RECOMPENSAS --}}
-<div class="mt-3 text-blue-400 text-sm">
-    ⚡ {{ $mission->xp_reward }} XP · 💰 {{ $mission->points_reward }} puntos
-</div>
+        @endif
 
-{{-- ACCIONES --}}
-<div class="mt-4">
-
-    @if($status === 'locked')
-
-        <span class="bg-gray-900 text-gray-400 px-3 py-1 rounded text-sm">
-            🔒 No disponible
-        </span>
-
-    @elseif($status === 'available')
-
-        <form method="POST"
-              action="/misiones/{{ $mission->id }}/complete"
-              onsubmit="showComplete(event)">
-            @csrf
-
-            <button
-                type="submit"
-                class="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-white text-sm transition">
-                🎯 Completar
-            </button>
-        </form>
-
-    @elseif($status === 'claimable')
-
-        <form method="POST"
-              action="/misiones/{{ $mission->id }}/claim"
-              onsubmit="showReward({{ $mission->xp_reward }}, {{ $mission->points_reward }})">
-            @csrf
-
-            <button
-                type="submit"
-                class="bg-yellow-500 hover:bg-yellow-400 animate-pulse px-3 py-1 rounded text-black font-semibold text-sm transition">
-                🎁 Reclamar recompensa
-            </button>
-        </form>
-
-    @elseif($status === 'claimed')
-
-        <span class="bg-green-900 text-green-300 px-3 py-1 rounded text-sm">
-            ✔ Recompensa obtenida
-        </span>
-
-    @endif
-
-</div>
-```
+    </div>
 
 </div>

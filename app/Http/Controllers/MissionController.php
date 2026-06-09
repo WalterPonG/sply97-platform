@@ -13,10 +13,16 @@ class MissionController extends Controller
 $user = auth()->user();
 
 if ($user) {
-    \App\Services\MissionService::completeDailyLoginMission($user);
+	MissionService::completeByCondition($user, 'login_daily');
 }
 
     $missions = MissionService::getUserMissions(auth()->user());
+$activeMissions = $missions->where('status', 'available');
+
+$completedMissions = $missions->where('status', 'claimed');
+$claimableMissions = $missions->where('status', 'claimable');
+$lockedMissions = $missions->where('status', 'locked');
+
 
     $grouped = $missions->groupBy('group');
 
@@ -32,7 +38,14 @@ if ($user) {
             'missions' => $missions,
         ];
     });
-    return view('missions.index', compact('progress'));
+    return view('missions.index', [
+    'missions' => $missions,
+    'activeMissions' => $activeMissions,
+    'completedMissions' => $completedMissions,
+    'claimableMissions' => $claimableMissions,
+    'lockedMissions' => $lockedMissions,
+    'progress' => $progress,
+    ]);
     }
 
     public function complete($id)

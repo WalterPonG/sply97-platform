@@ -4,75 +4,70 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Mission;
 use App\Models\UserMission;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class MissionService
 {
-
     public static function getUserMissions($user)
     {
-        return Mission::query()->get()->map(function ($mission) use ($user) {
+        $missions = Mission::query()->get()->map(function ($mission) use ($user) {
 
             $userMission = UserMission::firstOrCreate([
                 'user_id' => $user->id,
                 'mission_id' => $mission->id,
             ]);
 
-            $mission->completed = $userMission->completed;
-            $mission->claimed = $userMission->claimed;
+            // 🔥 DAILY = por fecha
+            if ($mission->type === 'daily') {
 
-            $mission->locked = $mission->available_at && now()->lt($mission->available_at);
-		 // 🎮 status calculado
-        if ($mission->locked) {
-            $mission->status = 'locked';
-        } elseif ($mission->claimed) {
-            $mission->status = 'claimed';
-        } elseif ($mission->completed) {
-            $mission->status = 'claimable';
-        } else {
-            $mission->status = 'available';
-        }
+                $mission->completed =
+                    $userMission->completed_at &&
+                    $userMission->completed_at->isToday();
+
+                $mission->claimed =
+                    $userMission->claimed_at &&
+                    $userMission->claimed_at->isToday();
+
+            } else {
+
+                // 🔥 ONE TIME = permanente
+                $mission->completed = (bool) $userMission->completed_at;
+                $mission->claimed = (bool) $userMission->claimed_at;
+            }
+
+            $mission->locked =
+                $mission->available_at &&
+                now()->lt($mission->available_at);
+
+            if ($mission->locked) {
+                $mission->status = 'locked';
+            } elseif ($mission->claimed) {
+                $mission->status = 'claimed';
+            } elseif ($mission->completed) {
+                $mission->status = 'claimable';
+            } else {
+                $mission->status = 'available';
+            }
 
             return $mission;
         });
 
-	// 👇 AQUÍ ES DONDE VA TU SORT
-    return $missions->sortBy(function ($mission) {
-        return match ($mission->status) {
-            'locked' => 0,
-            'available' => 1,
-            'claimable' => 2,
-            'claimed' => 3,
-        };
-    	});
-    }
-	public static function completeByCondition(User $user, string $conditionKey)
-	{
-    		$mission = Mission::where('condition_key', $conditionKey)->first();
-
-    		if (!$mission) {
-        		return false;
-    		}
-
-    		return self::completeMission($user, $mission->id);
-	}
-
-	public static function tryComplete($user, $mission)
-	{
-    	if (!self::canComplete($user, $mission)) {
-        return false;
+        return $missions->sortBy(function ($mission) {
+            return match ($mission->status) {
+                'locked' => 0,
+                'available' => 1,
+                'claimable' => 2,
+                'claimed' => 3,
+            };
+        });
     }
 
-    return self::completeMission($user, $mission->id);
-}
-
-	public static function completeMission(User $user, int $missionId)
+public static function completeMission(User $user, int $missionId)
 {
     $mission = Mission::findOrFail($missionId);
 
     if (!self::canComplete($user, $mission)) {
-        return false; //  no cumple requisitos
+        return false;
     }
 
     $userMission = UserMission::firstOrCreate([
@@ -80,17 +75,30 @@ class MissionService
         'mission_id' => $missionId,
     ]);
 
-    if ($userMission->completed) {
-        return false;
+    // DAILY = una vez por día
+    if ($mission->type === 'daily') {
+
+        if (
+            $userMission->completed_at &&
+            $userMission->completed_at->isToday()
+        ) {
+            return false;
+        }
+
+    } else {
+
+        // ONE TIME = una sola vez
+        if ($userMission->completed_at) {
+            return false;
+        }
     }
 
     $userMission->update([
-        'completed' => true,
         'completed_at' => now(),
     ]);
 
     return true;
-}
+    }
 
     public static function claimMission(User $user, int $missionId)
     {
@@ -100,110 +108,76 @@ class MissionService
                 ->where('mission_id', $missionId)
                 ->firstOrFail();
 
-            if (!$userMission->completed || $userMission->claimed) {
+            // 🔥 REGLA LIMPIA
+            if (!$userMission->completed_at || $userMission->claimed_at) {
                 return false;
             }
 
             $mission = $userMission->mission;
 
-            // sumar recompensas
             $user->points += $mission->points_reward;
-	    $user->addXp($mission->xp_reward);
+            $user->addXp($mission->xp_reward);
             $user->save();
 
             $userMission->update([
-                'claimed' => true,
+                'claimed_at' => now(),
             ]);
 
             return true;
         });
     }
 
-
-
-    public static function completeDailyLoginMission($user)
+    public static function completeByCondition(User $user, string $conditionKey)
     {
-    $mission = Mission::where('condition_key', 'login_daily')->first();
+        $mission = Mission::where('condition_key', $conditionKey)->first();
 
-    if (!$mission) {
-        return;
-    }
+        if (!$mission) return false;
 
-    $userMission = UserMission::firstOrCreate([
-        'user_id' => $user->id,
-        'mission_id' => $mission->id,
-    ]);
-
-    $today = now()->toDateString();
-    $last = optional($userMission->completed_at)->toDateString();
-
-    // 🔥 YA HECHO HOY → no repetir
-    if ($last === $today) {
-        return;
-    }
-
-    $userMission->update([
-        'completed' => true,
-        'completed_at' => now(),
-    ]);
-
-
-   
+        return self::completeMission($user, $mission->id);
     }
 
     public static function canComplete($user, $mission)
     {
+        if (!$mission->condition_key) return false;
 
-	if(!$mission->condition_key){
-		return false;
-	}
-	// bloqueos temporales por fecha
-	if($mission->available_at && now()->lt($mission->available_at)){
-		return false;
-	}
-    return match ($mission->condition_key) {
+        if ($mission->available_at && now()->lt($mission->available_at)) {
+            return false;
+        }
 
-        'login_daily' => true, // lo controlas en login event
+        return match ($mission->condition_key) {
 
-        'upload_avatar' => !empty($user->avatar),
+            'login_daily' => true,
 
-        'set_clash_tag' => !empty($user->clash_tag),
+            'upload_avatar' => !empty($user->avatar),
 
-	'profile_complete' => (
-		!empty($user->name) &&
-		!empty($user->email) &&
-		!empty($user->avatar) &&
-		!empty($user->clash_tag)
-	),
-        default => false,
-    };
-}
+            'set_clash_tag' => !empty($user->clash_tag),
 
-public static function getStatus($user, $mission)
-{
-    $userMission = UserMission::firstOrCreate([
-        'user_id' => $user->id,
-        'mission_id' => $mission->id,
-    ]);
+            'profile_complete' => (
+                !empty($user->name) &&
+                !empty($user->email) &&
+                !empty($user->avatar) &&
+                !empty($user->clash_tag)
+            ),
 
-    if ($userMission->claimed) return 'claimed';
-
-    if ($userMission->completed) return 'claimable';
-
-    if (!self::canComplete($user, $mission)) return 'available';
-
-    return 'locked';
-}
-public static function isDailyCompleted($user, $mission)
-{
-    $userMission = UserMission::where('user_id', $user->id)
-        ->where('mission_id', $mission->id)
-        ->first();
-
-    if (!$userMission || !$userMission->completed_at) {
-        return false;
+            default => false,
+        };
     }
 
-    return $userMission->completed_at->isToday();
-}
+    public static function getStatus($user, $mission)
+    {
+        $missions = self::getUserMissions($user);
+
+        $current = $missions->firstWhere('id', $mission->id);
+
+        return $current?->status ?? 'locked';
+    }
+
+    public static function isDailyCompleted($user, $mission)
+    {
+        $userMission = UserMission::where('user_id', $user->id)
+            ->where('mission_id', $mission->id)
+            ->first();
+
+        return $userMission?->completed_at?->isToday() ?? false;
+    }
 }

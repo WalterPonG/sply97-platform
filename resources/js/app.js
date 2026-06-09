@@ -6,23 +6,42 @@ window.Alpine = Alpine;
 
 Alpine.start();
 
-window.showReward = function (xp, points) {
-    const popup = document.getElementById('rewardPopup');
+window.showXP = function(amount) {
+    const el = document.createElement('div');
+    el.innerText = `+${amount} XP`;
 
-    popup.innerHTML = `
-        <div class="text-green-400 font-bold">+${xp} XP</div>
-        <div class="text-blue-400">+${points} puntos</div>
+    el.className = `
+        fixed bottom-20 right-6
+        bg-blue-500 text-white px-4 py-2 rounded-lg
+        shadow-lg animate-bounce
+        z-50
     `;
 
-    popup.classList.remove('hidden');
-    popup.classList.add('popup-anim');
+    document.body.appendChild(el);
 
-    setTimeout(() => {
-        popup.classList.add('hidden');
-        popup.classList.remove('popup-anim');
-    }, 2000);
+    setTimeout(() => el.remove(), 1200);
 };
 
+window.showReward = function(xp, points) {
+    showXP(xp);
+
+    const el = document.createElement('div');
+    el.innerHTML = `
+        🎉 Recompensa obtenida<br>
+        +${xp} XP<br>
+        +${points} monedas
+    `;
+
+    el.className = `
+        fixed inset-0 flex items-center justify-center
+        text-white text-xl font-bold
+        bg-black/60 z-50
+    `;
+
+    document.body.appendChild(el);
+
+    setTimeout(() => el.remove(), 1200);
+};
 window.showComplete = function () {
     const popup = document.getElementById('rewardPopup');
 
@@ -74,3 +93,5 @@ function addFeed(message, type = 'info') {
         el.remove();
     }, 4000);
 }
+
+
